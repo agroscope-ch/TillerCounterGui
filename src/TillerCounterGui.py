@@ -3,8 +3,11 @@ import re
 import tkinter as tk
 import numpy as np
 from tkinter import filedialog
-from TillerCounter import CTillerCounter
 from PIL import Image, ImageTk, ImageDraw
+
+from TillerCounter import CTillerCounter
+from config import IMG_WIDTH_LAPTOP, IMG_HEIGHT_LAPTOP, X_START, Y_START, USE_TWO_SCREENS
+from config import SCALE_DESKTOP_SCREEN, OFFSET
 
 class CTillerCounterGui(tk.Tk):
     def __init__(self):
@@ -13,10 +16,10 @@ class CTillerCounterGui(tk.Tk):
        self.geometry("2048x1024")
        self.orig_img_width = 0
        self.orig_img_height = 0
-       self.img_width = int(924*1.74)  # adapted to screen size: 924 for smaller screens
-       self.img_height = int(612*1.74) # adapted to screen size: 612 for smaller screens
-       self.img_x_start = 2
-       self.img_y_start = 60 # 100
+       self.img_width = int(IMG_WIDTH_LAPTOP*SCALE_DESKTOP_SCREEN)  # adapted to screen size: 924 for smaller screens. Factor 1.74 for desk screens (e.g. 1900 x 1200)
+       self.img_height = int(IMG_HEIGHT_LAPTOP*SCALE_DESKTOP_SCREEN) # adapted to screen size: 612 for smaller screens. Factor 1.74 for desk screens (e.g. 1900 x 1200)
+       self.img_x_start = X_START
+       self.img_y_start = Y_START # 100
        self.r_man = 6
        self._color_auto_tillers_fill = (255, 0, 0, 128)
        self._color_auto_tillers_outl = (255, 255, 0, 1)
@@ -27,7 +30,6 @@ class CTillerCounterGui(tk.Tk):
 
        # Define tkinter variables (that are displayed)
        self.tkstring_filename = tk.StringVar()   # filename of the image, e.g. DSC_0005.jpg
-       # self.tkstring_samplename = tk.StringVar() # samplename that can be added by the user e.g. Muster_Parzelle1_sample1
        self.tkstring_dir_path = tk.StringVar()   # directory containing all images
        self.tki_r_min = tk.IntVar()              # rmin of Hooge
        self.tki_r_max = tk.IntVar()              # rmax of Hooge
@@ -41,11 +43,6 @@ class CTillerCounterGui(tk.Tk):
                                            onvalue=1, offvalue=0, command=self.show_hide_detection)
        self.tkcheck_man_add = tk.Checkbutton(self, text='Manually Add', variable=self.tki_man_add, 
                                            onvalue=1, offvalue=0)
-       
-       # assign methods to notify on IntVar() variables (tkinter observer of the values in these widgets)
-       #self.tki_r_min.trace_add("write", self.calculate_sum) # when r_min is changed (written) -> calculate sum
-       #self.tki_r_max.trace_add("write", self.calculate_sum) # when r_max is changed (written) -> calculate sum
-       #self.tkstring_samplename.trace_add("write", self._add_sample_name) # when samplename is changed (written) -> add samplename
 
        self.create_widgets()
 
@@ -69,7 +66,6 @@ class CTillerCounterGui(tk.Tk):
         self.r_min_label                = tk.Label(self, text="Min radius(px): ")
         self.r_max_label                = tk.Label(self, text="Max radius(px): ")
         self.min_dist_label             = tk.Label(self, text="MinDist(px): ")
-        #self.samplename_label           = tk.Label(self, text="Sample name: ")
         self.filename_label             = tk.Label(self, text="File name: ")
         self.current_filename_label     = tk.Label(self, text="No file selected")
         self.tiller_count_label         = tk.Label(self, text="Tiller count: ")
@@ -87,7 +83,6 @@ class CTillerCounterGui(tk.Tk):
         self.tki_min_dist.set(50)
         self.tki_param1.set(95)
         self.tki_param2.set(28)
-        # self.samplename_entry = tk.Entry(self, textvariable=self.tkstring_samplename)
 
         padx = 3
         pady = 3
@@ -102,8 +97,6 @@ class CTillerCounterGui(tk.Tk):
         self.param2_label.grid(row=0, column=13, padx=padx, pady=pady)
         self.param2_entry.grid(row=0, column=14, padx=padx, pady=pady)
 
-        # self.samplename_label.grid(row=2, column=2, padx=2*padx, pady=pady)
-        # self.samplename_entry.grid(row=2, column=3, padx=2*padx, pady=pady)
         self.filename_label.grid(row=0, column=0, padx=2*padx, pady=pady)
         self.current_filename_label.grid(row=0, column=1, padx=2*padx, pady=pady)
         self.tkcheck_detected.grid(row=0, column=2)
@@ -111,8 +104,6 @@ class CTillerCounterGui(tk.Tk):
         self.tiller_count_label.grid(row=0, column=5, padx=2*padx, pady=pady)
         self.current_tiller_count_label.grid(row=0, column=6, padx=2*padx, pady=pady)
 
-        #self.lbl1 = tk.Label(master=self,textvariable=self.tkstring_dir_path)
-        #self.lbl1.grid(row=0, column=10)
         self.BBrowse = tk.Button(text="Browse", command=self.browse_button)
         self.BBrowse.grid(row=0, column=4)
         self.BBrowse = tk.Button(text="Apply", command=self.apply_Hooge_to_curr_img)
@@ -217,7 +208,7 @@ class CTillerCounterGui(tk.Tk):
         return None
 
     def export_img(self):
-        """  """
+        """ Exports the actual image with circles indicating tiller positions """
         # Correct Image quality
         Test = self.dir_list[self.idx_img]
         Path = self.dir_name + Test 
@@ -276,11 +267,17 @@ class CTillerCounterGui(tk.Tk):
         X = coord[0]
         Y = coord[1]
         # print(X)
-        if Y > self.img_y_start + 66 and X < self.img_width + 1950:
-        #if X > self.img_x_start and X < self.img_x_start + self.img_width and Y > self.img_y_start + 66 and Y < self.img_height + self.img_y_start + 66:
-          return True
+        if USE_TWO_SCREENS:
+          # check for your screen cofiguration
+          if Y > self.img_y_start + OFFSET and X < self.img_width + IMG_WIDTH_LAPTOP*SCALE_DESKTOP_SCREEN+4*OFFSET: 
+            return True
+          else:
+            return False
         else:
-          return False
+          if X > self.img_x_start and X < self.img_x_start + self.img_width and Y > self.img_y_start + OFFSET and Y < self.img_height + self.img_y_start + OFFSET:
+            return True
+          else:
+            return False
         
     def _add_sample_name(self, *args):
         """ If user wants to add a sample name """
@@ -306,11 +303,6 @@ class CTillerCounterGui(tk.Tk):
         self.orig_img_height = self.current_image_orig.size[1]
         self.current_image = self.current_image_orig.resize((self.img_width, self.img_height))
         self._show_current_image()
-        #displayed_img = ImageTk.PhotoImage(self.CurrentImage)
-
-        #label1 = tk.Label(image=displayed_img)
-        #label1.image = displayed_img # Position image
-        #label1.place(x=self.ImgXStart, y=self.ImgYStart)
 
     def _show_current_image(self):
         """ Places the current image to the dialog. """

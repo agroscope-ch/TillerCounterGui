@@ -1,0 +1,7 @@
+IMG_WIDTH_LAPTOP: int = 924
+IMG_HEIGHT_LAPTOP: int = 612
+SCALE_DESKTOP_SCREEN: float = 1.74
+X_START: int = 2
+Y_START: int = 60
+OFFSET: int = 66
+USE_TWO_SCREENS: bool = True
