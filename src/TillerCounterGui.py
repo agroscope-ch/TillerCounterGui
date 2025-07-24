@@ -31,12 +31,12 @@ class CTillerCounterGui(tk.Tk):
        # Define tkinter variables (that are displayed)
        self.tkstring_filename = tk.StringVar()   # filename of the image, e.g. DSC_0005.jpg
        self.tkstring_dir_path = tk.StringVar()   # directory containing all images
-       self.tki_r_min = tk.IntVar()              # rmin of Hooge
-       self.tki_r_max = tk.IntVar()              # rmax of Hooge
+       self.tki_r_min = tk.IntVar()              # rmin of Hough
+       self.tki_r_max = tk.IntVar()              # rmax of Hough
        self.tki_tiller_cnt = tk.IntVar()         # total tiller counts (displayed top right)
-       self.tki_min_dist = tk.IntVar()           # min distance for Hooge
-       self.tki_param1 = tk.IntVar()             # param1 Hooge (check!)
-       self.tki_param2 = tk.IntVar()             # param2 Hooge (check!)
+       self.tki_min_dist = tk.IntVar()           # min distance for Hough
+       self.tki_param1 = tk.IntVar()             # param1 Hough (check!)
+       self.tki_param2 = tk.IntVar()             # param2 Hough (check!)
        self.tki_show_detected = tk.IntVar()      # toggle the current auto and manually added/removed tiller detections
        self.tki_man_add = tk.IntVar()            # from checkbox (do I want to add? -> 1)
        self.tkcheck_detected = tk.Checkbutton(self, text='Show Detection', variable=self.tki_show_detected, # Checkboxes
@@ -106,7 +106,7 @@ class CTillerCounterGui(tk.Tk):
 
         self.BBrowse = tk.Button(text="Browse", command=self.browse_button)
         self.BBrowse.grid(row=0, column=4)
-        self.BBrowse = tk.Button(text="Apply", command=self.apply_Hooge_to_curr_img)
+        self.BBrowse = tk.Button(text="Apply", command=self.apply_Hough_to_curr_img)
         self.BBrowse.grid(row=0, column=7)
         self.BStartLoad = tk.Button(text="Export", command=self.export)
         self.BStartLoad.grid(row=0, column=8)
@@ -190,7 +190,7 @@ class CTillerCounterGui(tk.Tk):
         else:
           self._show_start_img()
 
-    def apply_Hooge_to_curr_img(self):
+    def apply_Hough_to_curr_img(self):
         Rmin = self.tki_r_min.get()
         Rmax = self.tki_r_max.get()
         MinDist = self.tki_min_dist.get()

@@ -1,6 +1,6 @@
 # Agroscope TillerCounter
 
-Basic counting tool for winter wheat tillers based on hand-collected bundle samples. Automatic detection via Hough transform and corrections via human labeler.
+Basic counting tool for winter wheat tillers based on hand-collected bundle samples. Automatic detection via Hough transform. Corrections are possible via human labeler.
 
 ## Required software
 
